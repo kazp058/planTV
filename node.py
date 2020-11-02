@@ -1,25 +1,34 @@
 #!/usr/bin/python3
-from raspi_lora import LoRa, ModemConfig
-from Crypto.Cipher import AES
+from config import retries
 
-class node:
+class Node:
 
-   def __init__(self, id, temperature, pressure, humidity, altitude, luminocity):
-       self.id = id
-       self.temperature = temperature
-       self.pressure = pressure
-       self.humidity = humidity
-       self.altitude = altitude
-       self.luminocity = luminocity
+     def __init__(self, address = [], temperature = "-1", pressure = "-1", \
+                  humidity = "-1", altitude = "-1", luminocity = "-1", subnodes = {}):
+          
+          self.address = address
+          self.temperature = temperature
+          self.pressure = pressure
+          self.humidity = humidity
+          self.altitude = altitude
+          self.luminocity = luminocity
+          self.subnodes = subnodes
 
-   def __init__(self, id):
-       node(self, id, -1, -1, -1, -1, -1, -1)
+     def search_nodes(self, lora):
+          new_subnodes = []
+          #Search for nodes in every subnode
+          for subnode in self.subnodes.keys():
+               cache = subnode.search_nodes(lora)              
+               new_subnodes.extend(cache)
+          
+          #Search for new nodes close to itself
+          return self.send_protocol(lora, self.address, "sn")
+               
+     def send_protocol(self, lora, node_address, protocol = "st"):          
+          status = lora.send_to_wait(".".join(self.address[1:] + "." + protocol), self.address[0], retries = retries)
 
-crypto = AES.new(b"planTVkey", AES.MODE_EAX)
-LoRa(0, 7, 0, freq = 915, tx_power = 5, modem_config = ModemConfig.Bw31_25Cr48Sf512,
-     recieve_all = False, acks = False, crypto = crypto)
+          return status
 
-
-devices = dict()
-
+     def add_subnode(self, address)
+          pass
 
