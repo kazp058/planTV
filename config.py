@@ -9,3 +9,5 @@ data_save_filename = "data"
 test_node_save_filename = "test_nodes"
 test_data_save_filename = "test_data"
 
+#Configurations
+retries = 5
