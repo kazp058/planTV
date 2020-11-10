@@ -1,24 +1,23 @@
-from raspi_lora import LoRa, ModemConfig
-from config import *
-import node
-from toolkit import save, read_devices
+#!/usr/bin/python3
 
-def on_recv(payload):
-    node_id = payload.header_from
-    message = payload.message
-    return node_id, message
+import time
+import serial
 
-nodes = read_devices()
+ser = serial.Serial("/dev/ttyACM0", baudrate=9600)
 
-lora = LoRa(0, 7, 0, freq = 915, tx_power = 5, modem_config = ModemConfig.Bw31_25Cr48Sf512,recieve_all = False, acks = False)
-lora.on_recv = on_recv
+try:
+    while True:
+          read = ser.readline().strip()
+          print(read)
 
-lora.set_mode_rx()
-message = "Hola mundo"
-status = lora.send_to_wait(message, 10, retries=2)
-if status is True:
-    print("Mensaje enviado!")
-else:
-    print("No hay confirmacion del receptor :c")
+except KeyboardInterrupt:
+    print("\nInterrupcion por teclado")
 
-lora.close()
+except ValueError as ve:
+    print(ve)
+    print("F")
+
+finally:
+    ser.close()
+
+
